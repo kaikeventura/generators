@@ -1,22 +1,30 @@
 package br.com.kaikeventura.generators.utils
 
 import br.com.kaikeventura.generators.model.BankSlip
-import br.com.kaikeventura.generators.repository.BankSlipConstants
+import br.com.kaikeventura.generators.constants.BankSlipConstants
+import br.com.kaikeventura.generators.dto.BankSlipDTO
+import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+@Component
 class BankSlipUtils() {
 
-    fun generateBankSlip(bankCode: String, dueDate: LocalDate, totalValue: Double): BankSlip {
-        val typedBarcode = generateTypedBarcode(bankCode, dueDate, totalValue)
+    fun generateBankSlip(bankSlipDTO: BankSlipDTO): BankSlip {
+        val typedBarcode = generateTypedBarcode(
+                bankSlipDTO.bankCode,
+                bankSlipDTO.dueDate,
+                bankSlipDTO.totalValue
+        )
+
         return BankSlip(
                 null,
                 typedBarcode,
-                converterBankSlipReadForTyped(typedBarcode),
-                bankCode,
-                dueDate,
+                converterBankSlipTypedForRead(typedBarcode),
+                bankSlipDTO.bankCode,
+                bankSlipDTO.dueDate,
                 LocalDateTime.now(),
-                totalValue
+                bankSlipDTO.totalValue
         )
     }
 
@@ -124,22 +132,16 @@ class BankSlipUtils() {
     }
 
     fun converterBankSlipReadForTyped(barcodeRead: String): String {
-        val blockOne = barcodeRead.substring(0, 4)
-        val blockTwo = barcodeRead.substring(19, 24)
-        val blockThree = calculateBlockCheckDigitWithNinePositions(blockOne.plus(blockTwo))
-        val blockFour = barcodeRead.substring(24, 34)
-        val blockFive = calculateBlockCheckDigitWithTenPositions(blockFour)
-        val blockSix = barcodeRead.substring(34, 44)
-        val blockSeven = calculateBlockCheckDigitWithTenPositions(blockSix)
-        val blockEight = barcodeRead.substring(4, 19)
+        val blockOne = calculateBlockCheckDigitWithNinePositions(
+                barcodeRead.substring(0, 4).plus(barcodeRead.substring(19, 24))
+        )
+        val blockTwo = calculateBlockCheckDigitWithTenPositions(barcodeRead.substring(24, 34))
+        val blockThree = calculateBlockCheckDigitWithTenPositions(barcodeRead.substring(34, 44))
+        val blockFour = barcodeRead.substring(4, 19)
 
         return blockOne
                 .plus(blockTwo)
                 .plus(blockThree)
                 .plus(blockFour)
-                .plus(blockFive)
-                .plus(blockSix)
-                .plus(blockSeven)
-                .plus(blockEight)
     }
 }
