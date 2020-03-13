@@ -31,7 +31,7 @@ class BankSlipUtils()
                 generateRandomNumbers(10)
         )
         var generalDigitVerification = blockOne[4]
-        var blockFour = calculateDueDays(dueDate)
+        var blockFour = calculateDueDays(dueDate)+getTotalValue(totalValue)
 
         return blockOne+blockTwo+blockThree+generalDigitVerification+blockFour
     }
@@ -90,11 +90,27 @@ class BankSlipUtils()
 
     fun calculateDueDays(dueDate: LocalDate): String {
         val dateBase = LocalDate.of(1997, 7, 10)
-        var a = dateBase.datesUntil(dueDate)
-        print(a.count())
-        return ""
+        return dateBase.datesUntil(dueDate).count().toString()
+    }
+
+    fun getTotalValue(totalValue: Double): String{
+        val value = totalValue.toString().replace(".","")
+        val totalDigits = value.length
+        if(totalDigits > 9){
+            throw Exception("Limit!")
+        }
+        var totalValueFormat = String()
+        var zeros = 9 - totalDigits
+        for (n in 0..zeros){
+            totalValueFormat += "0"
+        }
+        return totalValueFormat+value
     }
 
     fun main(args : Array<String>) {
-        print(calculateDueDays(LocalDate.now()))
+        print(generateTypedBarcode(
+                "341",
+                LocalDate.of(2020, 5, 23),
+                3456.45)
+        )
     }
